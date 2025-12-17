@@ -1,0 +1,185 @@
+<!-- templates/fragments/navbar.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" th:fragment="navbar">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">
+                <i class="bi bi-calendar-star"></i> TicketLoft
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">
+                            <i class="bi bi-house"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/eventos}">
+                            <i class="bi bi-calendar3"></i> Eventos
+                        </a>
+                    </li>
+                    <!-- Solo para usuarios autenticados -->
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/eventos/mis-eventos}">
+                            <i class="bi bi-calendar-plus"></i> Mis Eventos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/incidencias/nueva}">
+                            <i class="bi bi-envelope"></i> Contáctanos
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <!-- Si NO está autenticado -->
+                    <li class="nav-item" sec:authorize="isAnonymous()">
+                        <a class="nav-link" th:href="@{/auth/login}">
+                            <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión / Registrarse
+                        </a>
+                    </li>
+
+                    <!-- Si está autenticado -->
+                    <li class="nav-item" sec:authorize="isAuthenticated()">
+                        <a class="nav-link" th:href="@{/reservas/mis-reservas}">
+                            <i class="bi bi-ticket-perforated"></i> Mis Reservas
+                        </a>
+                    </li>
+
+                    <!-- Solo para ADMIN -->
+                    <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                        <a class="nav-link" th:href="@{/admin/dashboard}">
+                            <i class="bi bi-speedometer2"></i> Admin
+                        </a>
+                    </li>
+
+                    <!-- Dropdown de usuario (solo si está autenticado) -->
+                    <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i>
+                            <span sec:authentication="name">Usuario</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" th:href="@{/perfil}">
+                                    <i class="bi bi-person"></i> Mi Perfil
+                                </a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form th:action="@{/api/auth/logout}" method="post" class="d-inline w-100">
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <style>
+            .navbar {
+                background: rgba(15, 23, 42, 0.3);
+                backdrop-filter: blur(10px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                transition: all 0.3s ease;
+                padding: 1rem 0;
+            }
+
+            .navbar.scrolled {
+                background: rgba(15, 23, 42, 0.95);
+                box-shadow: 0 5px 30px rgba(0, 0, 0, 0.3);
+            }
+
+            .navbar-brand {
+                font-size: 1.5rem;
+                font-weight: 800;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .navbar-brand i {
+                -webkit-text-fill-color: #667eea;
+                background: none;
+                color: #667eea;
+            }
+
+            .nav-link {
+                color: rgba(255, 255, 255, 0.8) !important;
+                font-weight: 500;
+                padding: 0.5rem 1rem !important;
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .nav-link:hover {
+                color: #667eea !important;
+            }
+
+            .nav-link::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                width: 0;
+                height: 2px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                transition: all 0.3s ease;
+                transform: translateX(-50%);
+            }
+
+            .nav-link:hover::after {
+                width: 80%;
+            }
+
+            .dropdown-menu {
+                background: rgba(15, 23, 42, 0.95);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                margin-top: 0.5rem;
+            }
+
+            .dropdown-item {
+                color: rgba(255, 255, 255, 0.8);
+                transition: all 0.3s ease;
+            }
+
+            .dropdown-item:hover {
+                background: rgba(102, 126, 234, 0.2);
+                color: white;
+            }
+
+            .dropdown-item.text-danger:hover {
+                background: rgba(239, 68, 68, 0.2);
+            }
+
+            .dropdown-item button {
+                border: none;
+                background: none;
+                width: 100%;
+                text-align: left;
+            }
+
+            /* Espaciado para contenido debajo del navbar fixed */
+            body {
+                padding-top: 80px;
+            }
+        </style>
+    </nav>
+
+    <!-- Estilos del navbar (Legacy/Empty) -->
+    <style th:fragment="navbar-styles">
+        /* Styles moved to internal navbar fragment */
+    </style>
+</body>
+
+</html>

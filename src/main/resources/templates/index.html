@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - TicketLoft</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+
+    <style th:replace="~{fragments/navbar :: navbar-styles}"></style>
+</head>
+
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Alertas -->
+    <div class="container mt-3 position-relative" style="z-index: 10;">
+        <div class="alert alert-success alert-dismissible fade show reveal fade-in" role="alert" th:if="${success}">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div class="alert alert-danger alert-dismissible fade show reveal fade-in" role="alert" th:if="${error}">
+            <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    </div>
+
+    <!-- Hero Section con Parallax -->
+    <section class="hero-parallax">
+        <div class="parallax-bg"
+            style="background-image: url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1920&q=80');">
+        </div>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title reveal fade-in">
+                <span class="gradient-text">TicketLoft</span>
+            </h1>
+            <p class="hero-subtitle reveal slide-up">Los eventos a tu alcance</p>
+            <a th:href="@{/eventos}" class="btn-hero reveal scale-up">
+                <i class="bi bi-search"></i> Explorar Eventos
+                <span class="btn-glow"></span>
+            </a>
+        </div>
+        <div class="scroll-indicator">
+            <div class="mouse">
+                <div class="wheel"></div>
+            </div>
+            <p>Scroll</p>
+        </div>
+    </section>
+
+    <!-- Sección de Categorías con Parallax -->
+    <section class="categories-section">
+        <div class="parallax-bg"
+            style="background-image: url('https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?w=1920&q=80');">
+        </div>
+        <div class="section-overlay"></div>
+        <div class="container position-relative">
+            <h2 class="section-title text-center mb-5 reveal fade-in">
+                Explora por <span class="gradient-text">Categorías</span>
+            </h2>
+            <div class="row g-4 justify-content-center">
+                <div class="col-6 col-md-4 col-lg-2 reveal scale-up" th:each="categoria : ${categorias}">
+                    <a th:href="@{/eventos(categoria=${categoria.id})}" class="category-card">
+                        <div class="category-icon" th:text="${categoria.icono}">🎵</div>
+                        <h6 class="category-name" th:text="${categoria.nombre}">Música</h6>
+                        <div class="category-overlay"></div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Próximos Eventos con Parallax -->
+    <section class="events-section">
+        <div class="parallax-bg"
+            style="background-image: url('https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=1920&q=80');">
+        </div>
+        <div class="section-overlay"></div>
+        <div class="container position-relative">
+            <div class="d-flex justify-content-between align-items-center mb-5 reveal fade-in">
+                <h2 class="section-title">
+                    Próximos <span class="gradient-text">Eventos</span>
+                </h2>
+                <a th:href="@{/eventos}" class="btn-outline-custom">
+                    Ver todos <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Si no hay eventos -->
+            <div th:if="${#lists.isEmpty(eventos)}" class="alert alert-info text-center reveal fade-in">
+                <i class="bi bi-info-circle"></i> No hay eventos disponibles en este momento.
+            </div>
+
+            <!-- Grid de eventos -->
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-4 reveal scale-up" th:each="evento, eventoStat : ${eventos}"
+                    th:if="${eventoStat.index < 6}">
+                    <div class="event-card">
+                        <div class="event-image">
+                            <img th:if="${evento.imagenUrl != null}" th:src="${evento.imagenUrl}"
+                                th:alt="${evento.nombre}">
+                            <div class="event-image-placeholder" th:unless="${evento.imagenUrl != null}">
+                                <i class="bi bi-image"></i>
+                            </div>
+                            <div class="event-badge">
+                                <span class="badge-category" th:text="${evento.categoria.nombre}">Categoría</span>
+                            </div>
+                            <div class="event-date-badge">
+                                <span class="day" th:text="${#temporals.format(evento.fecha, 'dd')}">15</span>
+                                <span class="month" th:text="${#temporals.format(evento.fecha, 'MMM')}">DIC</span>
+                            </div>
+                        </div>
+
+                        <div class="event-body">
+                            <h5 class="event-title" th:text="${evento.nombre}">Nombre del Evento</h5>
+
+                            <div class="event-info">
+                                <div class="info-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <span th:text="${evento.lugar + ', ' + evento.ciudad}">Lugar</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-calendar3"></i>
+                                    <span th:text="${#temporals.format(evento.fecha, 'dd/MM/yyyy HH:mm')}">Fecha</span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="bi bi-people"></i>
+                                    <span th:text="${evento.plazasDisponibles + ' plazas disponibles'}">Aforo</span>
+                                </div>
+                            </div>
+
+                            <a th:href="@{'/eventos/' + ${evento.id}}" class="btn-event-details">
+                                <span>Ver Detalles</span>
+                                <i class="bi bi-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer con Parallax -->
+    <footer class="footer-parallax">
+        <div class="parallax-bg"
+            style="background-image: url('https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=1920&q=80');">
+        </div>
+        <div class="footer-overlay"></div>
+        <div class="container text-center position-relative">
+            <div class="footer-content">
+                <h3 class="footer-logo">
+                    <i class="bi bi-calendar-star"></i> TicketLoft
+                </h3>
+                <p class="footer-text">TicketLoft &copy; 2025 - Proyecto DAM</p>
+                <small class="footer-subtext">Gestión de eventos y reservas</small>
+                <div class="footer-social mt-4">
+                    <a href="#"><i class="bi bi-facebook"></i></a>
+                    <a href="#"><i class="bi bi-twitter"></i></a>
+                    <a href="#"><i class="bi bi-instagram"></i></a>
+                    <a href="#"><i class="bi bi-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/index.js}"></script>
+    <script>
+        window.addEventListener('scroll', function () {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+
+</html>

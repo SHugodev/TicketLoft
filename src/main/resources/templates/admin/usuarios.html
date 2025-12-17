@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Admin</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #ef4444;
+            --dark: #0f172a;
+            --text-light: #f1f5f9;
+            --gradient: linear-gradient(135deg, #dc3545, #c82333);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark);
+            color: var(--text-light);
+            padding-top: 80px;
+        }
+        
+        .page-header {
+            background: var(--gradient);
+            padding: 3rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .admin-nav {
+            background: rgba(220, 53, 69, 0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+        }
+
+        .table {
+            color: var(--text-light);
+        }
+
+        .table thead {
+            background: rgba(220, 53, 69, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top admin-nav">
+        <div class="container">
+            <a class="navbar-brand fw-bold" th:href="@{/admin/dashboard}">
+                <i class="bi bi-shield-check"></i> Panel Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/dashboard}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/admin/eventos}">Eventos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" th:href="@{/admin/usuarios}">Usuarios</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" th:href="@{/}">Ver sitio</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1 class="display-4 fw-bold">
+                <i class="bi bi-people"></i> Gestión de Usuarios
+            </h1>
+        </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="container mb-5">
+        <!-- Alertas -->
+        <div class="alert alert-success" th:if="${success}">
+            <i class="bi bi-check-circle"></i> <span th:text="${success}"></span>
+        </div>
+
+        <!-- Tabla de usuarios -->
+        <div class="card">
+            <div class="card-body">
+                <h4 class="mb-4"><i class="bi bi-list"></i> Lista de Usuarios</h4>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Fecha Registro</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="usuario : ${usuarios}">
+                                <td th:text="${usuario.id}">1</td>
+                                <td th:text="${usuario.nombre}">Usuario</td>
+                                <td th:text="${usuario.email}">email@example.com</td>
+                                <td>
+                                    <span class="badge bg-danger" th:if="${usuario.rol.name() == 'ADMIN'}">
+                                        ADMIN
+                                    </span>
+                                    <span class="badge bg-primary" th:if="${usuario.rol.name() == 'USUARIO'}">
+                                        USUARIO
+                                    </span>
+                                </td>
+                                <td th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy')}">Fecha</td>
+                                <td>
+                                    <span class="badge bg-success" th:if="${usuario.activo}">
+                                        <i class="bi bi-check-circle"></i> Activo
+                                    </span>
+                                    <span class="badge bg-secondary" th:unless="${usuario.activo}">
+                                        <i class="bi bi-x-circle"></i> Inactivo
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <!-- Cambiar estado -->
+                                        <form th:action="@{'/admin/usuarios/toggle-activo/' + ${usuario.id}}" 
+                                              method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm"
+                                                    th:classappend="${usuario.activo} ? 'btn-warning' : 'btn-success'"
+                                                    th:title="${usuario.activo} ? 'Desactivar' : 'Activar'">
+                                                <i class="bi" th:classappend="${usuario.activo} ? 'bi-ban' : 'bi-check-circle'"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Cambiar rol -->
+                                        <button type="button" class="btn btn-sm btn-info"
+                                                data-bs-toggle="modal" 
+                                                th:attr="data-bs-target='#rolModal' + ${usuario.id}">
+                                            <i class="bi bi-shield"></i>
+                                        </button>
+                                    </div>
+
+                                    <!-- Modal Cambiar Rol -->
+                                    <div class="modal fade" th:id="'rolModal' + ${usuario.id}">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content" style="background: #1e293b; color: white;">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Cambiar Rol</h5>
+                                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <form th:action="@{'/admin/usuarios/cambiar-rol/' + ${usuario.id}}" method="post">
+                                                    <div class="modal-body">
+                                                        <p>Usuario: <strong th:text="${usuario.nombre}"></strong></p>
+                                                        <label class="form-label">Nuevo rol:</label>
+                                                        <select class="form-select" name="rol" required
+                                                                style="background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.2);">
+                                                            <option value="USUARIO" th:selected="${usuario.rol.name() == 'USUARIO'}">
+                                                                USUARIO
+                                                            </option>
+                                                            <option value="ADMIN" th:selected="${usuario.rol.name() == 'ADMIN'}">
+                                                                ADMIN
+                                                            </option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary">Cambiar</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Resumen -->
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle"></i> 
+                    Total de usuarios: <strong th:text="${#lists.size(usuarios)}">0</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

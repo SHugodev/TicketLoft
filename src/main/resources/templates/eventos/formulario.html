@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Evento - TicketLoft</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #6366f1;
+            --dark: #0f172a;
+            --text-light: #f1f5f9;
+            --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark);
+            color: var(--text-light);
+            padding-top: 80px;
+        }
+
+        .page-header {
+            background: var(--gradient);
+            padding: 3rem 0;
+            margin-bottom: 3rem;
+        }
+
+        .form-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: var(--text-light);
+            border-radius: 10px;
+            padding: 0.75rem;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: rgba(255, 255, 255, 0.12);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+        }
+
+        .tipo-entrada-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-add-ticket {
+            background: transparent;
+            border: 2px dashed var(--primary);
+            color: var(--primary);
+            border-radius: 10px;
+            padding: 0.75rem;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .btn-add-ticket:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .btn-submit {
+            background: var(--gradient);
+            border: none;
+            border-radius: 15px;
+            padding: 1rem 3rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: var(--text-light);
+            border-radius: 15px;
+            padding: 1rem 3rem;
+            font-weight: 600;
+        }
+
+        .alert-custom {
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid var(--primary);
+            border-radius: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{fragments/navbar :: navbar}"></div>
+
+    <!-- Alertas -->
+    <div class="container mt-3">
+        <div class="alert alert-danger" th:if="${error}">
+            <i class="bi bi-exclamation-triangle"></i> <span th:text="${error}"></span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="page-header">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <h1 class="display-4 fw-bold">
+                        <i th:class="${esEdicion ? 'bi bi-pencil-square' : 'bi bi-plus-circle'}"></i>
+                        <span th:text="${esEdicion ? 'Editar Evento' : 'Crear Evento'}">Crear Evento</span>
+                    </h1>
+                    <p class="lead mb-0"
+                        th:text="${esEdicion ? 'Modifica los detalles de tu evento' : 'Comparte tu evento con la comunidad'}">
+                        Comparte tu evento con la comunidad</p>
+                </div>
+                <a th:href="@{/mis-eventos}" class="btn btn-light btn-lg mt-3 mt-md-0">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenido -->
+    <div class="container mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <!-- Información -->
+                <div class="alert alert-custom mb-4">
+                    <i class="bi bi-info-circle"></i>
+                    <strong>Importante:</strong> Tu evento será revisado por un administrador antes de ser publicado.
+                </div>
+
+                <!-- Formulario -->
+                <form th:action="@{/eventos/guardar}" method="post" th:object="${evento}">
+                    <input type="hidden" th:field="*{id}" />
+                    <input type="hidden" th:field="*{fechaCreacion}" />
+                    <input type="hidden" th:field="*{activo}" />
+                    <input type="hidden" th:field="*{estadoAprobacion}" />
+                    <input type="hidden" th:field="*{reservas}" />
+                    <input type="hidden" th:field="*{motivoRechazo}" />
+
+                    <!-- Datos básicos -->
+                    <div class="form-card">
+                        <h4 class="mb-4">
+                            <i class="bi bi-card-text text-primary"></i> Información del Evento
+                        </h4>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="nombre" class="form-label">
+                                    <i class="bi bi-card-heading"></i> Nombre del Evento *
+                                </label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" th:field="*{nombre}"
+                                    placeholder="Ej: Concierto de Jazz en directo" required minlength="5">
+                            </div>
+
+                            <div class="col-md-4 mb-3">
+                                <label for="categoria" class="form-label">
+                                    <i class="bi bi-tag"></i> Categoría *
+                                </label>
+                                <select class="form-select" id="categoria" name="categoria.id"
+                                    th:field="*{categoria.id}" required>
+                                    <option value="">Selecciona...</option>
+                                    <option th:each="cat : ${categorias}" th:value="${cat.id}"
+                                        th:text="${cat.icono + ' ' + cat.nombre}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="descripcion" class="form-label">
+                                <i class="bi bi-file-text"></i> Descripción
+                            </label>
+                            <textarea class="form-control" id="descripcion" name="descripcion" th:field="*{descripcion}"
+                                placeholder="Describe tu evento..."></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fecha" class="form-label">
+                                    <i class="bi bi-calendar3"></i> Fecha y Hora *
+                                </label>
+                                <input type="datetime-local" class="form-control" id="fecha" name="fecha"
+                                    th:field="*{fecha}" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="aforo" class="form-label">
+                                    <i class="bi bi-people"></i> Aforo Total *
+                                </label>
+                                <input type="number" class="form-control" id="aforo" name="aforo" th:field="*{aforo}"
+                                    placeholder="100" min="1" required>
+                                <small class="text-muted">Número máximo de asistentes</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="lugar" class="form-label">
+                                    <i class="bi bi-geo-alt"></i> Lugar *
+                                </label>
+                                <input type="text" class="form-control" id="lugar" name="lugar" th:field="*{lugar}"
+                                    placeholder="Ej: Auditorio Nacional" required>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="ciudad" class="form-label">
+                                    <i class="bi bi-pin-map"></i> Ciudad *
+                                </label>
+                                <input type="text" class="form-control" id="ciudad" name="ciudad" th:field="*{ciudad}"
+                                    placeholder="Ej: Madrid" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="imagenUrl" class="form-label">
+                                <i class="bi bi-image"></i> URL de Imagen (opcional)
+                            </label>
+                            <input type="url" class="form-control" id="imagenUrl" name="imagenUrl"
+                                th:field="*{imagenUrl}" placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                    </div>
+
+                    <!-- Tipos de entrada -->
+                    <div class="form-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">
+                                <i class="bi bi-ticket-perforated text-primary"></i> Tipos de Entrada
+                            </h4>
+                            <button type="button" class="btn btn-primary" onclick="agregarTipoEntrada()"
+                                style="background: var(--gradient); border: none; border-radius: 10px;">
+                                <i class="bi bi-plus-circle"></i> Añadir
+                            </button>
+                        </div>
+
+                        <div id="tiposEntradaContainer">
+                            <!-- Se añadirán dinámicamente -->
+                        </div>
+
+                        <div class="alert" style="background: rgba(245, 158, 11, 0.2); border: 1px solid #f59e0b;">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>Consejo:</strong> Añade al menos un tipo de entrada para que los usuarios puedan
+                            reservar.
+                        </div>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button type="submit" class="btn btn-submit">
+                            <i class="bi bi-check-circle"></i> <span
+                                th:text="${esEdicion ? 'Guardar Cambios' : 'Crear Evento'}">Crear Evento</span>
+                        </button>
+                        <a th:href="@{/mis-eventos}" class="btn btn-cancel">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let tipoCount = 0;
+
+        function agregarTipoEntrada() {
+            const container = document.getElementById('tiposEntradaContainer');
+            const tipoDiv = document.createElement('div');
+            tipoDiv.className = 'tipo-entrada-item';
+            tipoDiv.id = 'tipo_' + tipoCount;
+
+            tipoDiv.innerHTML = `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="mb-0">Tipo de Entrada ${tipoCount + 1}</h6>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="eliminarTipoEntrada(${tipoCount})"
+                            style="border-radius: 8px;">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" class="form-control" name="tipoNombre" 
+                               placeholder="Ej: VIP, Normal, Low Cost" required>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Descripción</label>
+                        <input type="text" class="form-control" name="tipoDescripcion" 
+                               placeholder="Ej: Acceso completo + bebida">
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Precio (€) *</label>
+                        <input type="number" class="form-control" name="tipoPrecio" 
+                               placeholder="15.00" step="0.01" min="0" required>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <label class="form-label">Cantidad Disponible *</label>
+                        <input type="number" class="form-control" name="tipoCantidad" 
+                               placeholder="50" min="1" required>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(tipoDiv);
+            tipoCount++;
+        }
+
+        // Cargar tipos de entrada existentes si estamos editando
+        /*[+
+        const entradasExistentes = [[${tiposEntrada}]];
+        if (entradasExistentes && entradasExistentes.length > 0) {
+            entradasExistentes.forEach(entrada => {
+                const container = document.getElementById('tiposEntradaContainer');
+                const tipoDiv = document.createElement('div');
+                tipoDiv.className = 'tipo-entrada-item';
+                tipoDiv.id = 'tipo_' + tipoCount;
+                
+                tipoDiv.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="mb-0">Tipo de Entrada ${tipoCount + 1}</h6>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="eliminarTipoEntrada(${tipoCount})"
+                                style="border-radius: 8px;">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" name="tipoNombre" 
+                                   value="${entrada.nombre}" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Descripción</label>
+                            <input type="text" class="form-control" name="tipoDescripcion" 
+                                   value="${entrada.descripcion || ''}">
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Precio (€) *</label>
+                            <input type="number" class="form-control" name="tipoPrecio" 
+                                   value="${entrada.precio}" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label">Cantidad Disponible *</label>
+                            <input type="number" class="form-control" name="tipoCantidad" 
+                                   value="${entrada.cantidadDisponible}" min="1" required>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(tipoDiv);
+                tipoCount++;
+            });
+        }
+        +]*/
+
+        function eliminarTipoEntrada(id) {
+            const elemento = document.getElementById('tipo_' + id);
+            if (elemento) {
+                elemento.remove();
+            }
+        }
+
+        // Añadir uno por defecto
+        document.addEventListener('DOMContentLoaded', function () {
+            // Añadir uno por defecto SOLO si no hay existentes
+            document.addEventListener('DOMContentLoaded', function () {
+                if (tipoCount === 0) {
+                    agregarTipoEntrada();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
