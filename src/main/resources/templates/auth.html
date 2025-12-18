@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TicketLoft - Autenticación</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --background: #0a0e27;
@@ -403,10 +405,11 @@
         }
     </style>
 </head>
+
 <body>
     <div class="auth-container" id="mainContainer">
         <div class="animated-circle"></div>
-        
+
         <div class="content-wrapper">
             <!-- SECCIÓN DE FORMULARIOS -->
             <div class="forms-section">
@@ -414,9 +417,9 @@
                 <form class="auth-form login-form" id="loginForm">
                     <h2 class="form-heading">¡Bienvenido de nuevo!</h2>
                     <p class="form-subtitle">Inicia sesión para continuar</p>
-                    
+
                     <div id="loginAlert" class="alert alert-error"></div>
-                    
+
                     <div class="field-container">
                         <i class="fas fa-envelope"></i>
                         <input type="email" id="loginEmail" name="email" placeholder="Correo electrónico" required>
@@ -430,12 +433,6 @@
 
                     <button type="submit" class="action-button">Entrar</button>
 
-                    <p class="social-heading">O inicia sesión con:</p>
-                    <div class="social-icons">
-                        <a href="#" class="social-link"><i class="fab fa-google"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                    </div>
-
                     <div class="back-home">
                         <a href="/">← Volver al inicio</a>
                     </div>
@@ -445,9 +442,9 @@
                 <form class="auth-form signup-form" id="signupForm">
                     <h2 class="form-heading">Crea tu cuenta</h2>
                     <p class="form-subtitle">Únete a TicketLoft</p>
-                    
+
                     <div id="signupAlert" class="alert"></div>
-                    
+
                     <div class="field-container">
                         <i class="fas fa-user"></i>
                         <input type="text" id="signupName" name="nombre" placeholder="Nombre completo" required>
@@ -460,7 +457,8 @@
 
                     <div class="field-container">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="signupPassword" name="contrasena" placeholder="Contraseña (mín. 6 caracteres)" required minlength="6">
+                        <input type="password" id="signupPassword" name="contrasena"
+                            placeholder="Contraseña (mín. 6 caracteres)" required minlength="6">
                         <i class="far fa-eye eye-icon" onclick="togglePasswordVisibility('signupPassword', this)"></i>
                     </div>
 
@@ -470,12 +468,6 @@
                     </div>
 
                     <button type="submit" class="action-button">Registrarse</button>
-
-                    <p class="social-heading">O regístrate con:</p>
-                    <div class="social-icons">
-                        <a href="#" class="social-link"><i class="fab fa-google"></i></a>
-                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
-                    </div>
 
                     <div class="back-home">
                         <a href="/">← Volver al inicio</a>
@@ -552,7 +544,7 @@
         // Manejo del formulario de LOGIN
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const email = document.getElementById('loginEmail').value.trim();
             const contrasena = document.getElementById('loginPassword').value.trim();
             const submitBtn = e.target.querySelector('.action-button');
@@ -594,7 +586,7 @@
         // Manejo del formulario de REGISTRO
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const nombre = document.getElementById('signupName').value.trim();
             const email = document.getElementById('signupEmail').value.trim();
             const contrasena = document.getElementById('signupPassword').value.trim();
@@ -634,7 +626,7 @@
                 if (response.ok) {
                     showAlert('signupAlert', '¡Cuenta creada! Redirigiendo...', false);
                     document.getElementById('signupForm').reset();
-                    
+
                     setTimeout(() => {
                         toggleForms();
                         showAlert('loginAlert', 'Cuenta creada exitosamente. Inicia sesión', false);
@@ -660,4 +652,5 @@
         });
     </script>
 </body>
+
 </html>
