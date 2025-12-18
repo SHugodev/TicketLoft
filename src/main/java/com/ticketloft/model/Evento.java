@@ -19,6 +19,7 @@ public class Evento {
     private String descripcion;
 
     @Column(nullable = false)
+    @org.springframework.format.annotation.DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     private LocalDateTime fecha;
 
     @Column(nullable = false, length = 200)
@@ -30,7 +31,7 @@ public class Evento {
     @Column(nullable = false)
     private Integer aforo = 100;
 
-    @Column(name = "imagen_url", length = 500)
+    @Column(name = "imagen_url", length = 2048)
     private String imagenUrl;
 
     @Column(name = "fecha_creacion")

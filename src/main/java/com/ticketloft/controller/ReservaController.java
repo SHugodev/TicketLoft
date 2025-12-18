@@ -113,6 +113,11 @@ public class ReservaController {
             return "redirect:/login";
         }
 
+        System.out.println("Procesando pago para evento: " + eventoId);
+        System.out.println("Usuario: " + usuario.getEmail());
+        System.out.println("Tipo Entrada: " + tipoEntradaId);
+        System.out.println("Cantidad: " + cantidad);
+
         try {
             Evento evento = eventoService.obtenerEventoPorId(eventoId)
                     .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
@@ -133,7 +138,12 @@ public class ReservaController {
             return "reservas/confirmacion";
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al procesar el pago: " + e.getMessage());
+            e.printStackTrace();
+            Throwable rootCause = e;
+            while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+                rootCause = rootCause.getCause();
+            }
+            redirectAttributes.addFlashAttribute("error", "Error detallado: " + rootCause.getMessage());
             return "redirect:/eventos/" + eventoId;
         }
     }

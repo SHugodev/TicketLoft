@@ -163,7 +163,22 @@ public class EventoController {
 
         model.addAttribute("evento", evento);
         model.addAttribute("categorias", eventoService.obtenerTodasLasCategorias());
-        model.addAttribute("tiposEntrada", eventoService.obtenerTiposEntradaPorEvento(evento));
+
+        // Convertir tipos de entrada a Map simple para evitar problemas de
+        // serialización en JS
+        List<TipoEntrada> tipos = eventoService.obtenerTiposEntradaPorEvento(evento);
+        List<java.util.Map<String, Object>> tiposJson = new java.util.ArrayList<>();
+        for (TipoEntrada t : tipos) {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", t.getId());
+            map.put("nombre", t.getNombre());
+            map.put("descripcion", t.getDescripcion());
+            map.put("precio", t.getPrecio());
+            map.put("cantidadDisponible", t.getCantidadDisponible());
+            tiposJson.add(map);
+        }
+        model.addAttribute("tiposEntrada", tiposJson);
+
         model.addAttribute("esEdicion", true);
         return "eventos/formulario";
     }
@@ -174,6 +189,7 @@ public class EventoController {
     @PostMapping("/guardar")
     public String guardarEvento(
             @ModelAttribute Evento evento,
+            @RequestParam(required = false) List<Long> tipoId,
             @RequestParam(required = false) List<String> tipoNombre,
             @RequestParam(required = false) List<String> tipoDescripcion,
             @RequestParam(required = false) List<Double> tipoPrecio,
@@ -198,18 +214,24 @@ public class EventoController {
                 }
             }
 
-            // Guardar evento (crear o actualizar)
             Evento eventoGuardado;
+            List<TipoEntrada> tiposAntiguos = new java.util.ArrayList<>();
+
             if (evento.getId() != null) {
                 // Es actualización
                 Evento eventoExistente = eventoService.obtenerEventoPorId(evento.getId()).orElse(null);
                 if (eventoExistente != null) {
-                    // Verificar permisos nuevamente
+                    // Verificar permisos
                     if (!eventoExistente.getCreadoPor().getId().equals(usuario.getId())
                             && usuario.getRol() != Usuario.Rol.ADMIN) {
                         throw new IllegalAccessException("No tienes permiso para editar este evento");
                     }
-                    // Actualizar campos
+
+                    // Guardar tipos antiguos para ver cuáles borrar
+                    tiposAntiguos = new java.util.ArrayList<>(
+                            eventoService.obtenerTiposEntradaPorEvento(eventoExistente));
+
+                    // Actualizar campos básicos
                     eventoExistente.setNombre(evento.getNombre());
                     eventoExistente.setDescripcion(evento.getDescripcion());
                     eventoExistente.setFecha(evento.getFecha());
@@ -219,20 +241,12 @@ public class EventoController {
                     eventoExistente.setCategoria(evento.getCategoria());
                     eventoExistente.setImagenUrl(evento.getImagenUrl());
 
-                    // Si se edita, vuelve a pendiente de aprobación si no es admin
                     if (usuario.getRol() != Usuario.Rol.ADMIN) {
                         eventoExistente.setEstadoAprobacion(Evento.EstadoAprobacion.PENDIENTE);
                     }
 
                     eventoGuardado = eventoService.actualizarEvento(eventoExistente);
 
-                    // Eliminar tipos de entrada antiguos si es edición (para simplificar, los
-                    // recreamos)
-                    // En una app real se debería hacer un merge más inteligente
-                    List<TipoEntrada> tiposAntiguos = eventoService.obtenerTiposEntradaPorEvento(eventoExistente);
-                    for (TipoEntrada te : tiposAntiguos) {
-                        tipoEntradaRepository.delete(te);
-                    }
                 } else {
                     throw new IllegalArgumentException("Evento no encontrado para actualizar");
                 }
@@ -241,30 +255,59 @@ public class EventoController {
                 eventoGuardado = eventoService.crearEvento(evento, usuario);
             }
 
-            // Guardar tipos de entrada si existen
+            // PROCESAR TIPOS DE ENTRADA (Update/Create/Delete)
             if (tipoNombre != null && !tipoNombre.isEmpty()) {
                 for (int i = 0; i < tipoNombre.size(); i++) {
-                    // Validaciones básicas
+                    Long id = (tipoId != null && tipoId.size() > i) ? tipoId.get(i) : null;
                     String nombre = tipoNombre.get(i);
                     Double precio = (tipoPrecio != null && tipoPrecio.size() > i) ? tipoPrecio.get(i) : 0.0;
                     Integer cantidad = (tipoCantidad != null && tipoCantidad.size() > i) ? tipoCantidad.get(i) : 0;
 
                     if (nombre == null || nombre.trim().isEmpty())
                         continue;
-                    if (precio == null || precio < 0)
-                        throw new IllegalArgumentException("El precio no puede ser negativo");
-                    if (cantidad == null || cantidad < 0)
-                        throw new IllegalArgumentException("La cantidad no puede ser negativa");
 
-                    TipoEntrada tipoEntrada = new TipoEntrada();
-                    tipoEntrada.setEvento(eventoGuardado);
+                    TipoEntrada tipoEntrada;
+                    if (id != null) {
+                        // UPDATE: Buscar y actualizar existente
+                        tipoEntrada = tiposAntiguos.stream()
+                                .filter(t -> t.getId().equals(id))
+                                .findFirst()
+                                .orElse(new TipoEntrada());
+
+                        // Quitar de la lista de antiguos (para saber que este SE QUEDA)
+                        tiposAntiguos.removeIf(t -> t.getId().equals(id));
+                    } else {
+                        // CREATE: Nuevo
+                        tipoEntrada = new TipoEntrada();
+                        tipoEntrada.setEvento(eventoGuardado);
+                    }
+
                     tipoEntrada.setNombre(nombre);
                     tipoEntrada.setDescripcion(tipoDescripcion != null ? tipoDescripcion.get(i) : "");
                     tipoEntrada.setPrecio(new java.math.BigDecimal(precio));
                     tipoEntrada.setCantidadDisponible(cantidad);
                     tipoEntrada.setActivo(true);
 
+                    // Asegurar relación en caso de update que perdiera referencia (raro, pero
+                    // safety)
+                    if (tipoEntrada.getEvento() == null)
+                        tipoEntrada.setEvento(eventoGuardado);
+
                     tipoEntradaRepository.save(tipoEntrada);
+                }
+            }
+
+            // DELETE: Borrar los que sobraron en tiposAntiguos (el usuario los quitó del
+            // formulario)
+            // Solo si no tienen reservas asociadas (aunque FK seguramente lo impida, mejor
+            // prevenir)
+            for (TipoEntrada te : tiposAntiguos) {
+                try {
+                    tipoEntradaRepository.delete(te);
+                } catch (Exception e) {
+                    // Si falla (ej: tiene reservas), lo mejor es desactivarlo en vez de borrar
+                    te.setActivo(false);
+                    tipoEntradaRepository.save(te);
                 }
             }
 

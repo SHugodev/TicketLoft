@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Confirmar Pago - TicketLoft</title>
+    <title>Reserva Confirmada - TicketLoft</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
     <style>
         :root {
@@ -15,6 +17,7 @@
             --dark: #0f172a;
             --text-light: #f1f5f9;
             --gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-color: #10b981;
         }
 
         body {
@@ -27,250 +30,120 @@
             align-items: center;
         }
 
-        .payment-container {
-            padding: 3rem 0;
-        }
-
-        .card {
+        .confirmation-card {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 25px;
             overflow: hidden;
+            text-align: center;
+            padding: 3rem 2rem;
         }
 
-        .card-header {
-            background: var(--gradient);
-            padding: 2rem;
-            border: none;
-        }
-
-        .event-preview {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .event-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--gradient);
-            border-radius: 15px;
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2rem;
+            margin: 0 auto 2rem;
+            color: var(--success-color);
+            font-size: 3.5rem;
+            border: 2px solid var(--success-color);
         }
 
-        .summary-section {
+        .order-details {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 15px;
             padding: 1.5rem;
-            margin-bottom: 2rem;
+            margin: 2rem 0;
+            text-align: left;
         }
 
-        .summary-item {
+        .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .summary-item:last-child {
-            border-bottom: none;
-            font-size: 1.2rem;
-            padding-top: 1rem;
-        }
-
-        .security-badge {
-            background: rgba(16, 185, 129, 0.2);
-            border: 1px solid #10b981;
-            border-radius: 10px;
-            padding: 1rem;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .payment-icons {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .payment-icon {
-            font-size: 2rem;
-            color: var(--text-light);
-            opacity: 0.7;
-        }
-
-        .form-control {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: var(--text-light);
-            border-radius: 10px;
-            padding: 0.75rem;
-        }
-
-        .form-control:focus {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: var(--primary);
-            color: white;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-
-        .form-control::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        .form-label {
-            font-weight: 600;
             margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.5rem;
         }
 
-        .btn-pay {
-            background: linear-gradient(135deg, #10b981, #059669);
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .btn-home {
+            background: var(--gradient);
             border: none;
-            padding: 1rem 2rem;
+            padding: 1rem 3rem;
             border-radius: 15px;
             font-weight: 600;
             font-size: 1.1rem;
-        }
-
-        .btn-cancel {
-            background: transparent;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: var(--text-light);
-            padding: 1rem 2rem;
-            border-radius: 15px;
-            font-weight: 600;
-        }
-
-        .btn-cancel:hover {
-            background: rgba(255, 255, 255, 0.1);
             color: white;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .btn-link {
+            color: var(--text-light);
+            text-decoration: none;
+            opacity: 0.8;
+            margin-top: 1rem;
+            display: inline-block;
         }
     </style>
 </head>
+
 <body>
     <div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <div class="container payment-container">
+    <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-xl-7">
-                <div class="card">
-                    <div class="card-header">
-                        <h4 class="mb-0"><i class="bi bi-credit-card-2-front"></i> Confirmar Pago</h4>
-                        <p class="mb-0 mt-2 opacity-75">Completa los datos para finalizar tu reserva</p>
+            <div class="col-lg-6">
+                <div class="confirmation-card">
+                    <div class="success-icon">
+                        <i class="bi bi-check-lg"></i>
                     </div>
-                    <div class="card-body p-4">
-                        <!-- Vista previa del evento -->
-                        <div class="event-preview">
-                            <div class="event-icon">
-                                <i class="bi bi-ticket-perforated-fill"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1" th:text="${evento.nombre}">Evento</h6>
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar3"></i>
-                                    <span th:text="${#temporals.format(evento.fecha, 'dd/MM/yyyy HH:mm')}"></span>
-                                </small>
-                            </div>
+
+                    <h2 class="mb-3">¡Reserva Confirmada!</h2>
+                    <p class="text-muted mb-4">Tu pago se ha procesado correctamente y tus entradas ya están listas.</p>
+
+                    <div class="order-details" th:if="${reserva != null}">
+                        <div class="detail-row">
+                            <span class="text-muted">Evento</span>
+                            <strong th:text="${reserva.evento.nombre}">Concierto Coldplay</strong>
                         </div>
-
-                        <!-- Resumen -->
-                        <div class="summary-section">
-                            <h5 class="mb-3"><i class="bi bi-receipt"></i> Resumen de compra</h5>
-                            <div class="summary-item">
-                                <span><i class="bi bi-ticket"></i> Tipo de entrada</span>
-                                <strong th:text="${tipoEntrada.nombre}">VIP</strong>
-                            </div>
-                            <div class="summary-item">
-                                <span><i class="bi bi-hash"></i> Cantidad</span>
-                                <strong><span th:text="${cantidad}">2</span> entrada(s)</strong>
-                            </div>
-                            <div class="summary-item">
-                                <span><i class="bi bi-tag"></i> Precio unitario</span>
-                                <strong>€<span th:text="${#numbers.formatDecimal(tipoEntrada.precio, 1, 2)}">50.00</span></strong>
-                            </div>
-                            <div class="summary-item">
-                                <span><i class="bi bi-calculator"></i> Total a pagar</span>
-                                <span class="text-primary fw-bold">€<span th:text="${#numbers.formatDecimal(precioTotal, 1, 2)}">100.00</span></span>
-                            </div>
+                        <div class="detail-row">
+                            <span class="text-muted">Fecha</span>
+                            <span th:text="${#temporals.format(reserva.evento.fecha, 'dd/MM/yyyy HH:mm')}">12/12/2026
+                                21:00</span>
                         </div>
-
-                        <!-- Badge de seguridad -->
-                        <div class="security-badge">
-                            <i class="bi bi-shield-fill-check"></i>
-                            <strong>Pago 100% seguro</strong> - Tus datos están protegidos
+                        <div class="detail-row">
+                            <span class="text-muted">Entradas</span>
+                            <span>
+                                <span th:text="${reserva.tipoEntrada.nombre}">VIP</span> x <span
+                                    th:text="${reserva.cantidad}">2</span>
+                            </span>
                         </div>
-
-                        <!-- Iconos de pago -->
-                        <div class="payment-icons">
-                            <i class="bi bi-credit-card payment-icon"></i>
-                            <i class="bi bi-credit-card-2-back payment-icon"></i>
-                            <i class="bi bi-wallet2 payment-icon"></i>
+                        <div class="detail-row">
+                            <span class="text-muted">Total Pagado</span>
+                            <strong class="text-primary"
+                                th:text="${#numbers.formatDecimal(reserva.precioTotal, 1, 2) + '€'}">150.00€</strong>
                         </div>
+                    </div>
 
-                        <!-- Formulario -->
-                        <form th:action="@{'/reservas/procesar-pago/' + ${evento.id}}" method="post" id="paymentForm">
-                            <input type="hidden" name="tipoEntradaId" th:value="${tipoEntrada.id}">
-                            <input type="hidden" name="cantidad" th:value="${cantidad}">
-
-                            <h5 class="mb-3"><i class="bi bi-credit-card-fill"></i> Datos de la tarjeta</h5>
-
-                            <!-- Número de tarjeta -->
-                            <div class="mb-3">
-                                <label class="form-label">
-                                    <i class="bi bi-credit-card"></i> Número de tarjeta
-                                </label>
-                                <input type="text" class="form-control" name="numeroTarjeta" id="cardNumber"
-                                    placeholder="1234 5678 9012 3456" maxlength="19" required>
-                                <small class="text-muted">Introduce los 16 dígitos de tu tarjeta</small>
-                            </div>
-
-                            <!-- Titular -->
-                            <div class="mb-3">
-                                <label class="form-label">
-                                    <i class="bi bi-person"></i> Nombre del titular
-                                </label>
-                                <input type="text" class="form-control" name="nombreTitular"
-                                    placeholder="Como aparece en la tarjeta" required>
-                            </div>
-
-                            <!-- Expiración y CVV -->
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">
-                                        <i class="bi bi-calendar-event"></i> Fecha de expiración
-                                    </label>
-                                    <input type="text" class="form-control" name="fechaExpiracion" id="expiry"
-                                        placeholder="MM/AA" maxlength="5" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label">
-                                        <i class="bi bi-lock"></i> CVV
-                                    </label>
-                                    <input type="text" class="form-control" name="cvv" id="cvv" placeholder="123"
-                                        maxlength="3" required>
-                                    <small class="text-muted">3 dígitos al reverso</small>
-                                </div>
-                            </div>
-
-                            <!-- Botones -->
-                            <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4">
-                                <a th:href="@{'/eventos/' + ${evento.id}}" class="btn btn-cancel">
-                                    <i class="bi bi-arrow-left"></i> Volver
-                                </a>
-                                <button type="submit" class="btn btn-pay">
-                                    <i class="bi bi-lock-fill"></i> Pagar €<span th:text="${#numbers.formatDecimal(precioTotal, 1, 2)}">100.00</span>
-                                </button>
-                            </div>
-                        </form>
+                    <div class="d-grid gap-2">
+                        <a th:href="@{/reservas/mis-reservas}" class="btn-home">
+                            <i class="bi bi-ticket-perforated"></i> Ver Mis Reservas
+                        </a>
+                        <a th:href="@{/eventos}" class="btn-link">
+                            Seguir explorando
+                        </a>
                     </div>
                 </div>
             </div>
@@ -278,30 +151,6 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Formatear número de tarjeta
-        const cardNumber = document.getElementById('cardNumber');
-        cardNumber.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\s/g, '');
-            let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
-            e.target.value = formattedValue;
-        });
-
-        // Formatear fecha expiración
-        const expiry = document.getElementById('expiry');
-        expiry.addEventListener('input', function(e) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length >= 2) {
-                value = value.slice(0, 2) + '/' + value.slice(2, 4);
-            }
-            e.target.value = value;
-        });
-
-        // Solo números en CVV
-        const cvv = document.getElementById('cvv');
-        cvv.addEventListener('input', function(e) {
-            e.target.value = e.target.value.replace(/\D/g, '');
-        });
-    </script>
 </body>
+
 </html>

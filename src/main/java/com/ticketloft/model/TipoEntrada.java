@@ -13,6 +13,7 @@ public class TipoEntrada {
 
     @ManyToOne
     @JoinColumn(name = "evento_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private Evento evento;
 
     @Column(nullable = false, length = 50)

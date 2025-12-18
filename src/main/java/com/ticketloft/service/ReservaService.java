@@ -59,7 +59,7 @@ public class ReservaService {
      * Obtener reservas de un usuario
      */
     public List<Reserva> obtenerReservasPorUsuario(Usuario usuario) {
-        return reservaRepository.findByUsuario(usuario);
+        return reservaRepository.findByUsuarioId(usuario.getId());
     }
 
     /**

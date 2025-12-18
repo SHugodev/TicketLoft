@@ -5,8 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "reservas", 
-       uniqueConstraints = @UniqueConstraint(columnNames = {"usuario_id", "evento_id", "tipo_entrada_id"}))
+@Table(name = "reservas")
 public class Reserva {
 
     @Id
